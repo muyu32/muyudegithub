@@ -1,39 +1,63 @@
 import Taro from '@tarojs/taro';
-import type { DBUser } from './db';
+import type { User } from '@/types';
+import { callFunction } from './cloud';
 
-export interface LoginResult {
-  success: boolean;
-  user?: DBUser;
-  message?: string;
-}
+const STORAGE_KEY = 'worklog_user';
 
-function isWeapp(): boolean {
-  return process.env.TARO_ENV === 'weapp';
-}
-
-async function callCloudFunction<T = any>(name: string, data?: Record<string, any>): Promise<T> {
-  const res = await Taro.cloud.callFunction({ name, data });
-  return res.result as T;
-}
-
-export async function loginByWechat(): Promise<LoginResult> {
-  if (!isWeapp()) {
-    return { success: false, message: '微信登录仅支持小程序环境' };
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const stored = Taro.getStorageSync<User>(STORAGE_KEY);
+    if (stored && stored._id) {
+      return stored;
+    }
+  } catch (e) {
+    console.error('[Auth] Failed to get current user:', e);
   }
-  return callCloudFunction<LoginResult>('loginByWechat');
+  return null;
 }
 
-export async function registerByAccount(
-  username: string,
-  password: string,
-  nickname: string
-): Promise<LoginResult> {
-  return callCloudFunction<LoginResult>('registerByAccount', { username, password, nickname });
+export function setCurrentUser(user: User | null): void {
+  if (user) {
+    Taro.setStorageSync(STORAGE_KEY, user);
+  } else {
+    Taro.removeStorageSync(STORAGE_KEY);
+  }
 }
 
-export async function loginByAccount(
-  username: string,
-  password: string
-): Promise<LoginResult> {
-  return callCloudFunction<LoginResult>('loginByAccount', { username, password });
+function assertSuccess(result: { success: boolean; message?: string }): void {
+  if (!result.success) {
+    throw new Error(result.message || '请求失败');
+  }
+}
+
+export async function loginByWechat(): Promise<User> {
+  const { code } = await Taro.login();
+  const result = await callFunction<{ success: boolean; user: User; message?: string }>('loginByWechat', { code });
+  assertSuccess(result);
+  setCurrentUser(result.user);
+  return result.user;
+}
+
+export async function loginByAccount(username: string, password: string): Promise<User> {
+  const result = await callFunction<{ success: boolean; user: User; message?: string }>('loginByAccount', {
+    username,
+    password
+  });
+  assertSuccess(result);
+  setCurrentUser(result.user);
+  return result.user;
+}
+
+export async function registerByAccount(username: string, password: string): Promise<User> {
+  const result = await callFunction<{ success: boolean; user: User; message?: string }>('registerByAccount', {
+    username,
+    password
+  });
+  assertSuccess(result);
+  setCurrentUser(result.user);
+  return result.user;
+}
+
+export async function logout(): Promise<void> {
+  setCurrentUser(null);
 }

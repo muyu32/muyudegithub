@@ -101,15 +101,21 @@
   height: 100%;
 }
 
-.loginIconImg {
-  width: 100%;
-  height: 100%;
-}
-
 .emptyText {
   font-size: $font-size-md;
   color: $color-text-tertiary;
   margin-bottom: $spacing-lg;
+}
+
+.addBtn {
+  width: 60%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  border: none;
 }
 
 .tagSection {
@@ -179,46 +185,3 @@
   height: 48rpx;
 }
 
-.loginPrompt {
-  background-color: $color-bg-card;
-  border-radius: $radius-xl;
-  padding: $spacing-xl * 2 $spacing-lg;
-  text-align: center;
-  margin-top: -$spacing-xl;
-  box-shadow: $shadow-card;
-}
-
-.loginIcon {
-  width: 120rpx;
-  height: 120rpx;
-  margin: 0 auto $spacing-lg;
-  color: $color-primary;
-  opacity: 0.6;
-}
-
-.loginTitle {
-  font-size: $font-size-xl;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  margin-bottom: $spacing-sm;
-  display: block;
-}
-
-.loginDesc {
-  font-size: $font-size-sm;
-  color: $color-text-tertiary;
-  margin-bottom: $spacing-xl;
-  display: block;
-  line-height: 1.6;
-}
-
-.loginBtn {
-  width: 80%;
-  height: $button-height-lg;
-  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
-  color: $color-text-white;
-  font-size: $font-size-md;
-  font-weight: $font-weight-medium;
-  border-radius: $radius-button;
-  border: none;
-}

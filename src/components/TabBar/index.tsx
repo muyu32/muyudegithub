@@ -27,7 +27,7 @@ export default function TabBar({ current, onChange }: TabBarProps) {
   const handleClick = (index: number) => {
     if (index !== current) {
       onChange(index);
-      Taro.redirectTo({
+      Taro.reLaunch({
         url: tabs[index].path
       });
     }

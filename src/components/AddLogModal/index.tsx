@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, Input, Textarea, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import { commonTags } from '@/data/log';
 import Tag from '@/components/Tag';
+import type { Log } from '@/types';
 
 interface AddLogModalProps {
   visible: boolean;
+  mode?: 'add' | 'edit';
+  initialData?: Partial<Pick<Log, 'title' | 'content' | 'duration' | 'tags'>>;
   onClose: () => void;
   onSave: (data: { title: string; content: string; duration: number; tags: string[] }) => void;
 }
 
-export default function AddLogModal({ visible, onClose, onSave }: AddLogModalProps) {
+export default function AddLogModal({ visible, mode = 'add', initialData, onClose, onSave }: AddLogModalProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [duration, setDuration] = useState('');
@@ -25,8 +28,23 @@ export default function AddLogModal({ visible, onClose, onSave }: AddLogModalPro
       setDuration('');
       setSelectedTags([]);
       setCustomTag('');
+      return;
     }
-  }, [visible]);
+
+    if (mode === 'edit' && initialData) {
+      setTitle(initialData.title || '');
+      setContent(initialData.content || '');
+      setDuration(initialData.duration !== undefined ? String(initialData.duration) : '');
+      setSelectedTags(initialData.tags || []);
+      setCustomTag('');
+    } else {
+      setTitle('');
+      setContent('');
+      setDuration('');
+      setSelectedTags([]);
+      setCustomTag('');
+    }
+  }, [visible, mode, initialData]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
@@ -57,11 +75,14 @@ export default function AddLogModal({ visible, onClose, onSave }: AddLogModalPro
 
   if (!visible) return null;
 
+  const modalTitle = mode === 'edit' ? '编辑日志' : '添加日志';
+  const saveText = mode === 'edit' ? '保存修改' : '保存';
+
   return (
     <View className={styles.modalOverlay} onClick={onClose}>
       <View className={styles.modal} onClick={e => e.stopPropagation()}>
         <View className={styles.header}>
-          <Text className={styles.title}>添加日志</Text>
+          <Text className={styles.title}>{modalTitle}</Text>
           <Text className={styles.close} onClick={onClose}>×</Text>
         </View>
         <View className={styles.content}>
@@ -72,7 +93,7 @@ export default function AddLogModal({ visible, onClose, onSave }: AddLogModalPro
                 className={styles.input}
                 placeholder="请输入工作内容标题"
                 value={title}
-                onChange={e => setTitle(e.detail.value)}
+                onInput={e => setTitle(e.detail.value)}
               />
             </View>
             <View className={styles.formItem}>
@@ -81,9 +102,9 @@ export default function AddLogModal({ visible, onClose, onSave }: AddLogModalPro
                 className={styles.textarea}
                 placeholder="请输入详细工作内容..."
                 value={content}
-                onChange={e => setContent(e.detail.value)}
+                onInput={e => setContent(e.detail.value)}
                 autoHeight
-                maxLength={500}
+                maxlength={500}
               />
             </View>
             <View className={styles.formItem}>
@@ -92,7 +113,7 @@ export default function AddLogModal({ visible, onClose, onSave }: AddLogModalPro
                 className={styles.input}
                 placeholder="请输入工作时长"
                 value={duration}
-                onChange={e => setDuration(e.detail.value)}
+                onInput={e => setDuration(e.detail.value)}
                 type="number"
               />
             </View>
@@ -116,7 +137,7 @@ export default function AddLogModal({ visible, onClose, onSave }: AddLogModalPro
                   className={styles.customInput}
                   placeholder="添加自定义标签"
                   value={customTag}
-                  onChange={e => setCustomTag(e.detail.value)}
+                  onInput={e => setCustomTag(e.detail.value)}
                   onConfirm={addCustomTag}
                 />
                 <Button className={styles.addBtn} onClick={addCustomTag}>添加</Button>
@@ -135,7 +156,7 @@ export default function AddLogModal({ visible, onClose, onSave }: AddLogModalPro
         </View>
         <View className={styles.footer}>
           <Button className={styles.cancelBtn} onClick={onClose}>取消</Button>
-          <Button className={styles.saveBtn} onClick={handleSave}>保存</Button>
+          <Button className={styles.saveBtn} onClick={handleSave}>{saveText}</Button>
         </View>
       </View>
     </View>

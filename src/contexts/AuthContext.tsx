@@ -1,133 +1,86 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import Taro from '@tarojs/taro';
-import { loginByWechat, registerByAccount, loginByAccount } from '@/services/auth';
-import type { DBUser } from '@/services/db';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import type { User } from '@/types';
+import { getCurrentUser, loginByWechat, loginByAccount, registerByAccount, logout } from '@/services/auth';
 
-interface UserInfo {
-  _id: string;
-  openid?: string;
-  username?: string;
-  nickname: string;
-  avatarUrl: string;
-  loginType: 'wechat' | 'account';
+interface AuthContextValue {
+  user: User | null;
+  loading: boolean;
+  loginByWechat: () => Promise<User>;
+  loginByAccount: (username: string, password: string) => Promise<User>;
+  registerByAccount: (username: string, password: string) => Promise<User>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
-interface AuthContextType {
-  isLoggedIn: boolean;
-  userInfo: UserInfo | null;
-  loginByWechat: () => Promise<{ success: boolean; message?: string }>;
-  loginByAccount: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  registerByAccount: (username: string, password: string, nickname: string) => Promise<{ success: boolean; message?: string }>;
-  logout: () => void;
-  checkLogin: () => boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const STORAGE_KEY = 'work_log_user_info';
-
-function toUserInfo(dbUser: DBUser): UserInfo {
-  return {
-    _id: dbUser._id,
-    openid: dbUser.openid,
-    username: dbUser.username,
-    nickname: dbUser.nickname,
-    avatarUrl: dbUser.avatarUrl,
-    loginType: dbUser.loginType
-  };
-}
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const stored = Taro.getStorageSync(STORAGE_KEY);
-    if (stored) {
-      try {
-        const user = JSON.parse(stored);
-        setUserInfo(user);
-        setIsLoggedIn(true);
-      } catch (e) {
-        console.error('[Auth] Failed to parse stored user info:', e);
-      }
+  const refreshUser = useCallback(async () => {
+    try {
+      const current = await getCurrentUser();
+      setUser(current);
+    } catch (error) {
+      console.error('[Auth] Failed to get current user:', error);
+      setUser(null);
     }
   }, []);
 
-  const handleLoginSuccess = (user: DBUser) => {
-    console.log('[AuthContext] login success user:', user);
-    const userInfoData = toUserInfo(user);
-    setUserInfo(userInfoData);
-    setIsLoggedIn(true);
-    Taro.setStorageSync(STORAGE_KEY, JSON.stringify(userInfoData));
-  };
+  useEffect(() => {
+    refreshUser().finally(() => setLoading(false));
+  }, [refreshUser]);
 
-  const wechatLogin = async (): Promise<{ success: boolean; message?: string }> => {
-    const result = await loginByWechat();
-    if (result.success && result.user) {
-      handleLoginSuccess(result.user);
-    }
-    return { success: result.success, message: result.message };
-  };
+  const handleLoginByWechat = useCallback(async () => {
+    const loggedIn = await loginByWechat();
+    setUser(loggedIn);
+    return loggedIn;
+  }, []);
 
-  const accountLogin = async (username: string, password: string): Promise<{ success: boolean; message?: string }> => {
-    const result = await loginByAccount(username, password);
-    if (result.success && result.user) {
-      handleLoginSuccess(result.user);
-    }
-    return { success: result.success, message: result.message };
-  };
+  const handleLoginByAccount = useCallback(async (username: string, password: string) => {
+    const loggedIn = await loginByAccount(username, password);
+    setUser(loggedIn);
+    return loggedIn;
+  }, []);
 
-  const accountRegister = async (username: string, password: string, nickname: string): Promise<{ success: boolean; message?: string }> => {
-    const result = await registerByAccount(username, password, nickname);
-    if (result.success && result.user) {
-      handleLoginSuccess(result.user);
-    }
-    return { success: result.success, message: result.message };
-  };
+  const handleRegisterByAccount = useCallback(async (username: string, password: string) => {
+    const registered = await registerByAccount(username, password);
+    setUser(registered);
+    return registered;
+  }, []);
 
-  const logout = () => {
-    setUserInfo(null);
-    setIsLoggedIn(false);
-    Taro.removeStorageSync(STORAGE_KEY);
-  };
-
-  const checkLogin = (): boolean => {
-    if (!isLoggedIn) {
-      Taro.showModal({
-        title: '提示',
-        content: '请先登录后使用',
-        confirmText: '去登录',
-        success: (res) => {
-          if (res.confirm) {
-            Taro.redirectTo({ url: '/pages/mine/index' });
-          }
-        }
-      });
-      return false;
-    }
-    return true;
-  };
+  const handleLogout = useCallback(async () => {
+    await logout();
+    setUser(null);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{
-      isLoggedIn,
-      userInfo,
-      loginByWechat: wechatLogin,
-      loginByAccount: accountLogin,
-      registerByAccount: accountRegister,
-      logout,
-      checkLogin
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        loginByWechat: handleLoginByWechat,
+        loginByAccount: handleLoginByAccount,
+        registerByAccount: handleRegisterByAccount,
+        logout: handleLogout,
+        refreshUser
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth(): AuthContextType {
+export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
+}
+
+export function useCurrentUserId(): string | undefined {
+  const { user } = useAuth();
+  return user?._id;
 }

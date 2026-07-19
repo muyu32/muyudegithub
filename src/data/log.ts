@@ -1,7 +1,15 @@
 import type { Log, StatData } from '@/types';
+import { generateId } from '@/utils';
 
-const today = new Date().toISOString().split('T')[0];
-const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+const today = formatLocalDate(new Date());
+const yesterday = formatLocalDate(new Date(Date.now() - 86400000));
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export const mockLogs: Log[] = [
   {
@@ -36,83 +44,6 @@ export const mockLogs: Log[] = [
     tags: ['会议', '团队'],
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    _id: '4',
-    userId: 'user1',
-    title: '修复登录页面bug',
-    content: '修复了登录页面在移动端的显示问题，包括键盘弹出时页面被遮挡、密码输入框无法粘贴等问题。',
-    date: yesterday,
-    duration: 120,
-    tags: ['开发', 'Bug修复'],
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    _id: '5',
-    userId: 'user1',
-    title: '编写单元测试',
-    content: '为用户模块编写了20个单元测试用例，覆盖率达到85%。',
-    date: yesterday,
-    duration: 150,
-    tags: ['测试', '代码'],
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    _id: '6',
-    userId: 'user1',
-    title: '客户需求沟通',
-    content: '与客户进行了需求沟通，了解了他们对新版本的期望和反馈。整理了需求变更文档。',
-    date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
-    duration: 90,
-    tags: ['沟通', '需求'],
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    updatedAt: new Date(Date.now() - 172800000).toISOString()
-  },
-  {
-    _id: '7',
-    userId: 'user1',
-    title: '性能优化',
-    content: '对首页加载速度进行了优化，通过懒加载和代码分割，将首屏加载时间从3秒降到1.5秒。',
-    date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
-    duration: 240,
-    tags: ['优化', '开发'],
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    updatedAt: new Date(Date.now() - 172800000).toISOString()
-  },
-  {
-    _id: '8',
-    userId: 'user1',
-    title: '技术分享',
-    content: '准备了关于React Hooks最佳实践的技术分享，在团队内部进行了交流。',
-    date: new Date(Date.now() - 259200000).toISOString().split('T')[0],
-    duration: 60,
-    tags: ['分享', '技术'],
-    createdAt: new Date(Date.now() - 259200000).toISOString(),
-    updatedAt: new Date(Date.now() - 259200000).toISOString()
-  },
-  {
-    _id: '9',
-    userId: 'user1',
-    title: '设计稿评审',
-    content: '参加设计稿评审会，对新功能的UI设计提出了修改建议。',
-    date: new Date(Date.now() - 259200000).toISOString().split('T')[0],
-    duration: 90,
-    tags: ['评审', '设计'],
-    createdAt: new Date(Date.now() - 259200000).toISOString(),
-    updatedAt: new Date(Date.now() - 259200000).toISOString()
-  },
-  {
-    _id: '10',
-    userId: 'user1',
-    title: '文档更新',
-    content: '更新了API文档，补充了新接口的说明和示例代码。',
-    date: new Date(Date.now() - 345600000).toISOString().split('T')[0],
-    duration: 120,
-    tags: ['文档', 'API'],
-    createdAt: new Date(Date.now() - 345600000).toISOString(),
-    updatedAt: new Date(Date.now() - 345600000).toISOString()
   }
 ];
 
@@ -131,3 +62,87 @@ export const mockStatData: StatData = {
 };
 
 export const commonTags = ['开发', '文档', '会议', '测试', '沟通', '需求', '审查', '优化', '分享', '设计', 'Bug修复', 'API'];
+
+export default function logMockHandler(payload: { action: string; data?: Record<string, any> }) {
+  const { action, data = {} } = payload;
+  const userId = data.userId || 'anonymous_user';
+
+  const userLogs = mockLogs.filter(log => log.userId === userId);
+
+  switch (action) {
+    case 'getLogs': {
+      let logs = userLogs;
+      if (data.date) {
+        logs = logs.filter(log => log.date === data.date);
+      }
+      return { success: true, logs };
+    }
+
+    case 'getLogById': {
+      const log = userLogs.find(item => item._id === data.id);
+      return { success: true, log: log || null };
+    }
+
+    case 'createLog': {
+      const now = new Date().toISOString();
+      const newLog: Log = {
+        _id: generateId(),
+        userId,
+        ...data.log,
+        createdAt: now,
+        updatedAt: now
+      };
+      mockLogs.push(newLog);
+      return { success: true, log: newLog };
+    }
+
+    case 'updateLog': {
+      const index = mockLogs.findIndex(item => item._id === data.id && item.userId === userId);
+      if (index === -1) {
+        return { success: false, log: null, message: '日志不存在或无权限' };
+      }
+      mockLogs[index] = {
+        ...mockLogs[index],
+        ...data.updates,
+        updatedAt: new Date().toISOString()
+      };
+      return { success: true, log: mockLogs[index] };
+    }
+
+    case 'deleteLog': {
+      const index = mockLogs.findIndex(item => item._id === data.id && item.userId === userId);
+      if (index === -1) {
+        return { success: false, message: '日志不存在或无权限' };
+      }
+      mockLogs.splice(index, 1);
+      return { success: true };
+    }
+
+    case 'getStats': {
+      const todayStr = formatLocalDate(new Date());
+      const todayList = userLogs.filter(log => log.date === todayStr);
+      const tagMap: Record<string, { count: number; duration: number }> = {};
+      userLogs.forEach(log => {
+        log.tags.forEach(tag => {
+          if (!tagMap[tag]) tagMap[tag] = { count: 0, duration: 0 };
+          tagMap[tag].count += 1;
+          tagMap[tag].duration += log.duration;
+        });
+      });
+      const tagStats = Object.entries(tagMap).map(([tag, stat]) => ({ tag, ...stat }));
+      return {
+        success: true,
+        stats: {
+          totalLogs: userLogs.length,
+          totalDuration: userLogs.reduce((sum, log) => sum + log.duration, 0),
+          todayLogs: todayList.length,
+          todayDuration: todayList.reduce((sum, log) => sum + log.duration, 0),
+          tagStats
+        }
+      };
+    }
+
+    default:
+      return { success: false, message: '未知操作' };
+  }
+}

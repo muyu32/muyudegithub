@@ -23,11 +23,15 @@ export function formatDate(dateStr: string): string {
   return `${month}月${day}日`;
 }
 
+function pad(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
 export function formatFullDate(dateStr: string): string {
   const date = new Date(dateStr);
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
   return `${year}-${month}-${day}`;
 }
 
@@ -39,15 +43,18 @@ export function getWeekDays(): { date: string; day: string; isToday: boolean }[]
   const days = [];
   const today = new Date();
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-  
+
   for (let i = 6; i >= 0; i--) {
     const date = new Date(Date.now() - i * 86400000);
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
     days.push({
-      date: date.toISOString().split('T')[0],
+      date: `${year}-${month}-${day}`,
       day: weekDays[date.getDay()],
       isToday: i === 0
     });
   }
-  
+
   return days;
 }

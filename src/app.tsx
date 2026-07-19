@@ -1,10 +1,15 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDidShow, useDidHide } from '@tarojs/taro';
 import Taro from '@tarojs/taro';
-import { AuthProvider } from './contexts/AuthContext';
+import type { ReactNode } from 'react';
+import { AuthProvider } from '@/contexts/AuthContext';
 import './app.scss';
 
-function App(props) {
+interface AppProps {
+  children: ReactNode;
+}
+
+function App({ children }: AppProps) {
   useEffect(() => {
     if (process.env.TARO_ENV === 'weapp') {
       Taro.cloud.init({
@@ -18,7 +23,11 @@ function App(props) {
 
   useDidHide(() => {});
 
-  return <AuthProvider>{props.children}</AuthProvider>;
+  return (
+    <AuthProvider>
+      {children}
+    </AuthProvider>
+  );
 }
 
 export default App;

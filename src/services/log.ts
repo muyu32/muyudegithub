@@ -1,30 +1,36 @@
-import Taro from '@tarojs/taro';
 import type { Log, StatData } from '@/types';
+import { callFunction } from './cloud';
 
-async function callLogFunction<T = any>(
-  action: string,
-  data?: Record<string, any>
-): Promise<T> {
-  const res = await Taro.cloud.callFunction({
-    name: 'log',
-    data: { action, data }
-  });
-  return res.result as T;
+interface LogResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  logs?: Log[];
+  log?: Log | null;
+  stats?: StatData;
+}
+
+function assertSuccess<T>(result: LogResponse<T>): void {
+  if (!result.success) {
+    throw new Error(result.message || '请求失败');
+  }
 }
 
 export async function getLogs(userId: string, date?: string): Promise<Log[]> {
-  const result = await callLogFunction<{ success: boolean; logs: Log[] }>('getLogs', {
-    userId,
-    date
+  const result = await callFunction<LogResponse<{ logs: Log[] }>>('log', {
+    action: 'getLogs',
+    data: { userId, date }
   });
+  assertSuccess(result);
   return result.logs || [];
 }
 
 export async function getLogById(userId: string, id: string): Promise<Log | undefined> {
-  const result = await callLogFunction<{ success: boolean; log: Log | null }>('getLogById', {
-    userId,
-    id
+  const result = await callFunction<LogResponse<{ log: Log | null }>>('log', {
+    action: 'getLogById',
+    data: { userId, id }
   });
+  assertSuccess(result);
   return result.log || undefined;
 }
 
@@ -32,11 +38,12 @@ export async function createLog(
   userId: string,
   log: Omit<Log, '_id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<Log> {
-  const result = await callLogFunction<{ success: boolean; log: Log }>('createLog', {
-    userId,
-    log
+  const result = await callFunction<LogResponse<{ log: Log }>>('log', {
+    action: 'createLog',
+    data: { userId, log }
   });
-  return result.log;
+  assertSuccess(result);
+  return result.log!;
 }
 
 export async function updateLog(
@@ -44,24 +51,28 @@ export async function updateLog(
   id: string,
   updates: Partial<Omit<Log, '_id' | 'userId' | 'createdAt'>>
 ): Promise<Log | null> {
-  const result = await callLogFunction<{ success: boolean; log: Log | null; message?: string }>(
-    'updateLog',
-    { userId, id, updates }
-  );
+  const result = await callFunction<LogResponse<{ log: Log | null }>>('log', {
+    action: 'updateLog',
+    data: { userId, id, updates }
+  });
+  assertSuccess(result);
   return result.log || null;
 }
 
 export async function deleteLog(userId: string, id: string): Promise<boolean> {
-  const result = await callLogFunction<{ success: boolean; message?: string }>('deleteLog', {
-    userId,
-    id
+  const result = await callFunction<LogResponse<undefined>>('log', {
+    action: 'deleteLog',
+    data: { userId, id }
   });
+  assertSuccess(result);
   return result.success;
 }
 
 export async function getStats(userId: string): Promise<StatData> {
-  const result = await callLogFunction<{ success: boolean; stats: StatData }>('getStats', {
-    userId
+  const result = await callFunction<LogResponse<{ stats: StatData }>>('log', {
+    action: 'getStats',
+    data: { userId }
   });
-  return result.stats;
+  assertSuccess(result);
+  return result.stats!;
 }

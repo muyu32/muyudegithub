@@ -1,32 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import type { Log } from '@/types';
-import { getLogById, deleteLog } from '@/services/log';
+import { getLogById, updateLog, deleteLog } from '@/services/log';
 import { formatDuration, formatDate } from '@/utils';
 import Tag from '@/components/Tag';
+import AddLogModal from '@/components/AddLogModal';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function DetailPage() {
-  const { userInfo } = useAuth();
+  const { user } = useAuth();
   const [log, setLog] = useState<Log | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editVisible, setEditVisible] = useState(false);
+
+  const userId = user?._id;
 
   useEffect(() => {
+    if (!userId) return;
     const pages = Taro.getCurrentPages();
     const currentPage = pages[pages.length - 1];
     const options = (currentPage as unknown as { options: { id: string } }).options;
-    if (options?.id && userInfo) {
+    if (options?.id) {
       fetchLog(options.id);
     }
-  }, [userInfo]);
+  }, [userId]);
 
   const fetchLog = async (id: string) => {
-    if (!userInfo) return;
+    if (!userId) return;
     setLoading(true);
     try {
-      const logData = await getLogById(userInfo._id, id);
+      const logData = await getLogById(userId, id);
       if (logData) {
         setLog(logData);
       } else {
@@ -41,19 +46,36 @@ export default function DetailPage() {
     }
   };
 
-  const handleEdit = () => {
-    Taro.showToast({ title: '编辑功能开发中', icon: 'none' });
+  const handleEditSave = async (data: { title: string; content: string; duration: number; tags: string[] }) => {
+    if (!log || !userId) return;
+    try {
+      const updated = await updateLog(userId, log._id, {
+        ...data,
+        date: log.date
+      });
+      if (updated) {
+        setEditVisible(false);
+        setLog(updated);
+        Taro.showToast({ title: '保存成功', icon: 'success' });
+      } else {
+        Taro.showToast({ title: '保存失败', icon: 'none' });
+      }
+    } catch (error) {
+      console.error('[Detail] Failed to update log:', error);
+      Taro.showToast({ title: '保存失败', icon: 'none' });
+    }
   };
 
   const handleDelete = () => {
+    if (!log || !userId) return;
     Taro.showModal({
       title: '确认删除',
       content: '确定要删除这条日志吗？',
       confirmColor: '#F53F3F',
       success: async (res) => {
-        if (res.confirm && log && userInfo) {
+        if (res.confirm) {
           try {
-            const result = await deleteLog(userInfo._id, log._id);
+            const result = await deleteLog(userId, log._id);
             if (result) {
               Taro.showToast({ title: '删除成功', icon: 'success' });
               setTimeout(() => Taro.navigateBack(), 1500);
@@ -82,7 +104,15 @@ export default function DetailPage() {
   }
 
   if (!log) {
-    return null;
+    return (
+      <View className={styles.page}>
+        <View className={styles.pageContent}>
+          <View className={styles.card}>
+            <Text className={styles.title}>日志不存在或已删除</Text>
+          </View>
+        </View>
+      </View>
+    );
   }
 
   return (
@@ -106,13 +136,26 @@ export default function DetailPage() {
       </View>
 
       <View className={styles.footer}>
-        <Button className={`${styles.btn} ${styles.editBtn}`} onClick={handleEdit}>
+        <Button className={`${styles.btn} ${styles.editBtn}`} onClick={() => setEditVisible(true)}>
           编辑
         </Button>
         <Button className={`${styles.btn} ${styles.deleteBtn}`} onClick={handleDelete}>
           删除
         </Button>
       </View>
+
+      <AddLogModal
+        visible={editVisible}
+        mode="edit"
+        initialData={{
+          title: log.title,
+          content: log.content,
+          duration: log.duration,
+          tags: log.tags
+        }}
+        onClose={() => setEditVisible(false)}
+        onSave={handleEditSave}
+      />
     </View>
   );
 }

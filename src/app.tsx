@@ -3,6 +3,7 @@ import { useDidShow, useDidHide } from '@tarojs/taro';
 import Taro from '@tarojs/taro';
 import type { ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { getCurrentUser } from '@/services/auth';
 import './app.scss';
 
 interface AppProps {
@@ -17,7 +18,20 @@ function App({ children }: AppProps) {
         traceUser: true
       });
     }
+
+    checkLoginStatus();
   }, []);
+
+  const checkLoginStatus = async () => {
+    try {
+      const user = await getCurrentUser();
+      const target = user ? '/pages/home/index' : '/pages/login/index';
+      Taro.reLaunch({ url: target });
+    } catch (error) {
+      console.error('[App] Failed to check login status:', error);
+      Taro.reLaunch({ url: '/pages/login/index' });
+    }
+  };
 
   useDidShow(() => {});
 

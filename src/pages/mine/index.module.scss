@@ -142,3 +142,26 @@
   margin-top: 8rpx;
 }
 
+.logoutSection {
+  margin: $spacing-lg 0;
+}
+
+.logoutBtn {
+  width: 100%;
+  height: $button-height-lg;
+  background-color: $color-bg-card;
+  color: $color-error;
+  font-size: $font-size-md;
+  border-radius: $radius-lg;
+  border: none;
+  box-shadow: $shadow-card;
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
+
+  &::after {
+    border: none;
+  }
+}
+

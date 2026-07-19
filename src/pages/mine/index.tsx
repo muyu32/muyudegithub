@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, Image } from '@tarojs/components';
+import { View, Text, Image, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import type { StatData } from '@/types';
@@ -14,7 +14,7 @@ import aboutIcon from '@/assets/icons/about.svg';
 import arrowRightIcon from '@/assets/icons/arrow-right.svg';
 
 export default function MinePage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [stats, setStats] = useState<StatData | null>(null);
 
   const userId = user?._id;
@@ -50,6 +50,15 @@ export default function MinePage() {
 
   const handleMenuClick = (text: string) => {
     Taro.showToast({ title: `${text}功能开发中`, icon: 'none' });
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      Taro.reLaunch({ url: '/pages/login/index' });
+    } catch (error) {
+      console.error('[Mine] Logout failed:', error);
+    }
   };
 
   return (
@@ -98,6 +107,12 @@ export default function MinePage() {
           <Text className={styles.aboutText}>工作日志小程序</Text>
           <Text className={styles.aboutVersion}>版本 1.0.0</Text>
         </View>
+
+        {user && (
+          <View className={styles.logoutSection}>
+            <Button className={styles.logoutBtn} onClick={handleLogout}>退出登录</Button>
+          </View>
+        )}
 
         <TabBar current={3} onChange={() => {}} />
       </View>

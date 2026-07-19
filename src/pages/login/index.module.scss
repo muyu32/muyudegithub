@@ -1,0 +1,170 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  padding: 120rpx $page-padding 160rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 56rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.subtitle {
+  font-size: $font-size-md;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.card {
+  background-color: $color-bg-card;
+  border-radius: $radius-xl $radius-xl 0 0;
+  margin-top: -$radius-xl;
+  padding: $spacing-xl $page-padding 160rpx;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: $spacing-xl;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-md 0;
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  position: relative;
+
+  &.active {
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 48rpx;
+      height: 4rpx;
+      background-color: $color-primary;
+      border-radius: 2rpx;
+    }
+  }
+}
+
+.wechatSection {
+  text-align: center;
+  padding: $spacing-xl 0;
+}
+
+.wechatIcon {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-xl;
+  background-color: #07C160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto $spacing-lg;
+}
+
+.wechatIconText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.wechatDesc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xl;
+  display: block;
+}
+
+.wechatBtn {
+  width: 100%;
+  height: $button-height-lg;
+  background-color: #07C160;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  border: none;
+
+  &:active {
+    opacity: 0.9;
+  }
+
+  &::after {
+    border: none;
+  }
+}
+
+.form {
+  padding-top: $spacing-md;
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.input {
+  width: 100%;
+  height: $button-height-md;
+  padding: 0 $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.submitBtn {
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  border: none;
+  margin-top: $spacing-md;
+
+  &:active {
+    opacity: 0.9;
+  }
+
+  &::after {
+    border: none;
+  }
+}
+
+.toggleRow {
+  text-align: center;
+  margin-top: $spacing-lg;
+}
+
+.toggleText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}

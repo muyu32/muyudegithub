@@ -10,7 +10,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .modal {
@@ -55,6 +55,7 @@
 
 .formInner {
   padding: $spacing-lg;
+  padding-bottom: 200rpx;
 }
 
 .formItem {
@@ -142,7 +143,7 @@
   display: flex;
   gap: $spacing-md;
   padding: $spacing-lg;
-  padding-bottom: 48rpx;
+  padding-bottom: 180rpx;
   border-top: 1rpx solid $color-divider;
   flex-shrink: 0;
 }

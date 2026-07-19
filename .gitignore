@@ -1,0 +1,8 @@
+node_modules
+dist
+.pai
+.swc
+.DS_Store
+*.log
+project.private.config.json
+ppt-master

@@ -1,0 +1,224 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pageContent {
+  padding: 0 $page-padding 188rpx;
+}
+
+.header {
+  padding: $spacing-xl $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border-radius: 0 0 $radius-xl $radius-xl;
+  margin-left: -(#{ $page-padding });
+  margin-right: -(#{ $page-padding });
+  margin-bottom: $spacing-lg;
+  padding-left: 64rpx;
+}
+
+.greeting {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  margin-bottom: $spacing-sm;
+}
+
+.date {
+  font-size: $font-size-md;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.statsRow {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.statItem {
+  flex: 1;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  text-align: center;
+  box-shadow: $shadow-card;
+}
+
+.statValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  display: block;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: 8rpx;
+  display: block;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionMore {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}
+
+.todayLogs {
+  margin-bottom: $spacing-lg;
+}
+
+.emptyState {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl * 2;
+  text-align: center;
+  box-shadow: $shadow-card;
+}
+
+.emptyIcon {
+  width: 120rpx;
+  height: 120rpx;
+  margin: 0 auto $spacing-lg;
+  opacity: 0.5;
+}
+
+.emptyIconImg {
+  width: 100%;
+  height: 100%;
+}
+
+.loginIconImg {
+  width: 100%;
+  height: 100%;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-lg;
+}
+
+.tagSection {
+  margin-bottom: $spacing-lg;
+}
+
+.weekList {
+  display: flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.dayItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  margin-right: $spacing-sm;
+  min-width: 80rpx;
+  flex-shrink: 0;
+  
+  &.today {
+    background-color: $color-primary;
+    
+    .dayLabel, .dayDate {
+      color: $color-text-white;
+    }
+  }
+}
+
+.dayLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 4rpx;
+}
+
+.dayDate {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.addButton {
+  position: fixed;
+  right: $page-padding;
+  bottom: 188rpx;
+  width: 112rpx;
+  height: 112rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: $shadow-float;
+  z-index: 100;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.addIcon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.loginPrompt {
+  background-color: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl * 2 $spacing-lg;
+  text-align: center;
+  margin-top: -$spacing-xl;
+  box-shadow: $shadow-card;
+}
+
+.loginIcon {
+  width: 120rpx;
+  height: 120rpx;
+  margin: 0 auto $spacing-lg;
+  color: $color-primary;
+  opacity: 0.6;
+}
+
+.loginTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.loginDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xl;
+  display: block;
+  line-height: 1.6;
+}
+
+.loginBtn {
+  width: 80%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  border: none;
+}

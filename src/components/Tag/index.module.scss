@@ -1,0 +1,17 @@
+@use '@/styles/variables.scss' as *;
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  background-color: $color-primary-light;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  color: $color-primary;
+  transition: all $transition-fast;
+  
+  &.active {
+    background-color: $color-primary;
+    color: $color-text-white;
+  }
+}

@@ -1,0 +1,44 @@
+@use '@/styles/variables.scss' as *;
+
+.tabBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  padding-bottom: 32rpx;
+  background-color: $color-bg-card;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  box-sizing: content-box;
+}
+
+.tabItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100rpx;
+  padding-top: 8rpx;
+}
+
+.icon {
+  width: 44rpx;
+  height: 44rpx;
+  margin-bottom: 6rpx;
+}
+
+.text {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  line-height: 1.2;
+}
+
+.activeText {
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}

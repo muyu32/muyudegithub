@@ -9,16 +9,17 @@ const MOCK_USERS: Record<string, { _id: string; username: string; password: stri
   }
 };
 
-export default function loginByAccountMock(data?: Record<string, any>): User {
+export default function loginByAccountMock(data?: Record<string, any>): { success: boolean; user?: User; message?: string } {
   const { username, password } = data || {};
   const account = MOCK_USERS[username];
   if (!account || account.password !== password) {
-    throw new Error('用户名或密码错误');
+    return { success: false, message: '用户名或密码错误' };
   }
-  return {
+  const user: User = {
     _id: account._id,
     openid: '',
     nickname: account.nickname,
     avatarUrl: ''
   };
+  return { success: true, user };
 }

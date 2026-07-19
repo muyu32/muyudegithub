@@ -84,6 +84,7 @@ export default function ListPage() {
   })();
 
   const handleAddLog = async (data: { title: string; content: string; duration: number; tags: string[] }) => {
+    console.log('[List] handleAddLog userId:', userId, 'data:', data);
     if (!userId) {
       Taro.showToast({ title: '请先登录', icon: 'none' });
       return;
@@ -98,7 +99,7 @@ export default function ListPage() {
       fetchLogs();
     } catch (error) {
       console.error('[List] Failed to add log:', error);
-      Taro.showToast({ title: '添加失败', icon: 'none' });
+      Taro.showToast({ title: error instanceof Error ? error.message : '添加失败', icon: 'none' });
     }
   };
 
